@@ -124,7 +124,7 @@ class LLMEngine:
 
                 self._tokenizer = AutoTokenizer.from_pretrained(
                     self.model_name,
-                    trust_remote_code=True,
+                    trust_remote_code=False,
                 )
 
                 dtype = torch.float16 if self.device == "cuda" else torch.float32
@@ -133,7 +133,7 @@ class LLMEngine:
                     self.model_name,
                     torch_dtype=dtype,
                     device_map=self.device if self.device == "auto" else None,
-                    trust_remote_code=True,
+                    trust_remote_code=False,
                 )
 
                 if self.device != "auto":
@@ -278,3 +278,20 @@ class LLMEngine:
     def clear_cache(self) -> None:
         """Clear the response cache."""
         self._cache.clear()
+
+
+def create_engine(backend: str = "local", **options: Any) -> Any:
+    """Builds an LLM engine (CursedForge fork).
+
+    ``backend="local"`` returns :class:`LLMEngine` (a model in this process).
+    ``backend="remote"`` returns :class:`opennpc.remote_llm.RemoteLLMEngine`
+    (an OpenAI-compatible server, for example Open-WebUI). Both have the same
+    ``generate`` and ``status`` methods.
+    """
+    if backend == "local":
+        return LLMEngine(**options)
+    if backend == "remote":
+        from opennpc.remote_llm import RemoteLLMEngine
+
+        return RemoteLLMEngine(**options)
+    raise ValueError(f"unknown LLM backend: {backend}")

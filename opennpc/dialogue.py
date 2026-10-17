@@ -118,7 +118,7 @@ class NPCDialogue:
 
     Parameters
     ----------
-    llm : LLMEngine
+    llm : LLMEngine or RemoteLLMEngine (any engine with generate and status)
         The shared LLM engine instance.
     """
 
